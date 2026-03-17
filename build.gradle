@@ -8,9 +8,9 @@ group = 'com.brainstorm'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+	// Railway 배포 환경에서 설치된 JDK를 그대로 사용
+	sourceCompatibility = '17'
+	targetCompatibility = '17'
 }
 
 configurations {
