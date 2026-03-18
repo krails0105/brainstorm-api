@@ -3,7 +3,6 @@ package com.brainstorm.brainstorm_api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.brainstorm.brainstorm_api.dto.FavoriteRequest;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Favorite;
 import com.brainstorm.brainstorm_api.entity.Room;
@@ -36,13 +35,11 @@ class FavoriteServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 테스트용 유저 생성
         testUser = new User();
         testUser.setName("testUser");
         testUser.setPassword("password");
         userRepository.save(testUser);
 
-        // 테스트용 룸 생성
         RoomRequest roomRequest = new RoomRequest();
         roomRequest.setOwner(testUser);
         roomRequest.setName("Test Room");
@@ -53,13 +50,8 @@ class FavoriteServiceTest {
 
     @Test
     void save_shouldCreateFavorite() {
-        // given - 즐겨찾기 요청
-        FavoriteRequest request = new FavoriteRequest();
-        request.setUserId(testUser.getId());
-        request.setRoomId(testRoom.getId());
-
         // when - 즐겨찾기 추가
-        Favorite saved = favoriteService.save(request);
+        Favorite saved = favoriteService.save(testUser.getId(), testRoom.getId());
 
         // then - 즐겨찾기 저장 확인
         assertThat(saved.getId()).isNotNull();
@@ -70,10 +62,7 @@ class FavoriteServiceTest {
     @Test
     void getFavoriteByUserId_shouldReturnFavorites() {
         // given - 즐겨찾기 추가
-        FavoriteRequest request = new FavoriteRequest();
-        request.setUserId(testUser.getId());
-        request.setRoomId(testRoom.getId());
-        favoriteService.save(request);
+        favoriteService.save(testUser.getId(), testRoom.getId());
 
         // when - 유저의 즐겨찾기 목록 조회
         Page<Favorite> favorites = favoriteService.getFavoriteByUserId(
@@ -86,16 +75,10 @@ class FavoriteServiceTest {
     @Test
     void delete_shouldRemoveFavorite() {
         // given - 즐겨찾기 추가
-        FavoriteRequest addRequest = new FavoriteRequest();
-        addRequest.setUserId(testUser.getId());
-        addRequest.setRoomId(testRoom.getId());
-        favoriteService.save(addRequest);
+        favoriteService.save(testUser.getId(), testRoom.getId());
 
         // when - 즐겨찾기 삭제
-        FavoriteRequest deleteRequest = new FavoriteRequest();
-        deleteRequest.setUserId(testUser.getId());
-        deleteRequest.setRoomId(testRoom.getId());
-        favoriteService.delete(deleteRequest);
+        favoriteService.delete(testUser.getId(), testRoom.getId());
 
         // then - 즐겨찾기 0개
         Page<Favorite> favorites = favoriteService.getFavoriteByUserId(
@@ -105,13 +88,8 @@ class FavoriteServiceTest {
 
     @Test
     void delete_shouldThrowWhenFavoriteNotFound() {
-        // given - 즐겨찾기가 없는 상태
-        FavoriteRequest request = new FavoriteRequest();
-        request.setUserId(testUser.getId());
-        request.setRoomId(testRoom.getId());
-
         // when & then - 존재하지 않는 즐겨찾기 삭제 시 예외 발생
-        assertThatThrownBy(() -> favoriteService.delete(request))
+        assertThatThrownBy(() -> favoriteService.delete(testUser.getId(), testRoom.getId()))
             .isInstanceOf(NoSuchElementException.class);
     }
 }

@@ -1,6 +1,5 @@
 package com.brainstorm.brainstorm_api.service;
 
-import com.brainstorm.brainstorm_api.dto.FavoriteRequest;
 import com.brainstorm.brainstorm_api.entity.Favorite;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
@@ -26,10 +25,7 @@ public class FavoriteService {
         return favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 
-    public Favorite save(FavoriteRequest favoriteRequest) {
-        Long userId = favoriteRequest.getUserId();
-        Long roomId = favoriteRequest.getRoomId();
-
+    public Favorite save(Long userId, Long roomId) {
         User user = userRepository.findById(userId).orElseThrow();
         Room room = roomRepository.findById(roomId).orElseThrow();
 
@@ -39,10 +35,7 @@ public class FavoriteService {
         return favoriteRepository.save(favorite);
     }
 
-    public void delete(FavoriteRequest favoriteRequest) {
-        Long userId = favoriteRequest.getUserId();
-        Long roomId = favoriteRequest.getRoomId();
-
+    public void delete(Long userId, Long roomId) {
         Optional<Favorite> favorite = favoriteRepository.findByUserIdAndRoomId(userId, roomId);
         if (favorite.isEmpty()) {
             throw new NoSuchElementException("Not Found Room");

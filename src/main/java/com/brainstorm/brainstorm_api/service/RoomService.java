@@ -1,6 +1,5 @@
 package com.brainstorm.brainstorm_api.service;
 
-import com.brainstorm.brainstorm_api.dto.RoomMemberRequest;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.repository.RoomRepository;
@@ -36,10 +35,7 @@ public class RoomService {
         newRoom.setIsPublic(roomRequest.getIsPublic());
         Room savedRoom = roomRepository.save(newRoom);
 
-        RoomMemberRequest roomMemberRequest = new RoomMemberRequest();
-        roomMemberRequest.setRoomId(savedRoom.getId());
-        roomMemberRequest.setUserId(savedRoom.getOwner().getId());
-        roomMemberService.save(roomMemberRequest);
+        roomMemberService.save(savedRoom.getId(), savedRoom.getOwner().getId());
         return savedRoom;
     }
 

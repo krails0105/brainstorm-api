@@ -1,7 +1,6 @@
 package com.brainstorm.brainstorm_api.service;
 
 import com.brainstorm.brainstorm_api.common.exception.RoomFullException;
-import com.brainstorm.brainstorm_api.dto.RoomMemberRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.RoomMember;
 import com.brainstorm.brainstorm_api.entity.User;
@@ -29,11 +28,7 @@ public class RoomMemberService {
         return roomMemberRepository.countByRoomId(roomId);
     }
 
-    public RoomMember save(RoomMemberRequest roomMemberRequest) {
-        RoomMember roomMember = new RoomMember();
-        Long roomId = roomMemberRequest.getRoomId();
-        Long userId = roomMemberRequest.getUserId();
-
+    public RoomMember save(Long roomId, Long userId) {
         Room room = roomRepository.findById(roomId).orElseThrow();
         long roomMembersCount = getRoomMembersCount(room.getId());
         if (roomMembersCount >= room.getTotalUserCount()) {
@@ -41,6 +36,7 @@ public class RoomMemberService {
         }
 
         User user = userRepository.findById(userId).orElseThrow();
+        RoomMember roomMember = new RoomMember();
         roomMember.setRoom(room);
         roomMember.setUser(user);
 
@@ -48,8 +44,7 @@ public class RoomMemberService {
     }
 
     @Transactional
-    public void delete(RoomMemberRequest roomMemberRequest) {
-        roomMemberRepository.deleteByRoomIdAndUserId(
-            roomMemberRequest.getRoomId(), roomMemberRequest.getUserId());
+    public void delete(Long roomId, Long userId) {
+        roomMemberRepository.deleteByRoomIdAndUserId(roomId, userId);
     }
 }
