@@ -2,6 +2,7 @@ package com.brainstorm.brainstorm_api.controller;
 
 import com.brainstorm.brainstorm_api.entity.RoomMember;
 import com.brainstorm.brainstorm_api.service.RoomMemberService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Room Member", description = "룸 멤버 관리")
 @RestController
 @RequestMapping("/api/rooms/{roomId}/members")
 @AllArgsConstructor
