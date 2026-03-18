@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,23 +18,22 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Room {
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "room_id"})
+})
+public class Favorite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    private String name;
-
-    private String topic;
-
-    private Integer totalUserCount;
-
-    private Boolean isPublic;
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     private LocalDateTime createdAt;
 
@@ -42,4 +43,5 @@ public class Room {
             this.createdAt = LocalDateTime.now();
         }
     }
+
 }
