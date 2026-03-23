@@ -3,7 +3,8 @@ package com.brainstorm.brainstorm_api.controller;
 import com.brainstorm.brainstorm_api.entity.Favorite;
 import com.brainstorm.brainstorm_api.service.FavoriteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Favorite", description = "즐겨찾기 관리")
 @RestController
 @RequestMapping("/api/users/{userId}/favorites")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
 
     @GetMapping
-    public Page<Favorite> listFavorite(@PathVariable Long userId,
+    public Page<Favorite> listFavorite(@PathVariable UUID userId,
         @RequestParam(defaultValue = "0") int page) {
 
         int pageSize = 10;
@@ -37,14 +38,14 @@ public class FavoriteController {
     }
 
     @PostMapping("/{roomId}")
-    public ResponseEntity<Favorite> createFavorite(@PathVariable Long userId,
+    public ResponseEntity<Favorite> createFavorite(@PathVariable UUID userId,
         @PathVariable Long roomId) {
         Favorite save = favoriteService.save(userId, roomId);
         return ResponseEntity.status(HttpStatus.CREATED).body(save);
     }
 
     @DeleteMapping("/{roomId}")
-    public ResponseEntity<Void> deleteFavorite(@PathVariable Long userId,
+    public ResponseEntity<Void> deleteFavorite(@PathVariable UUID userId,
         @PathVariable Long roomId) {
         favoriteService.delete(userId, roomId);
         return ResponseEntity.noContent().build();

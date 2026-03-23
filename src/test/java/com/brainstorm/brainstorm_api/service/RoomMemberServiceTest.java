@@ -36,12 +36,14 @@ class RoomMemberServiceTest {
     @BeforeEach
     void setUp() {
         owner = new User();
-        owner.setName("owner");
+        owner.setEmail("owner@example.com");
+        owner.setNickname("owner");
         owner.setPassword("password");
         userRepository.save(owner);
 
         member = new User();
-        member.setName("member");
+        member.setEmail("member@example.com");
+        member.setNickname("member");
         member.setPassword("password");
         userRepository.save(member);
 

@@ -8,12 +8,13 @@ import com.brainstorm.brainstorm_api.repository.RoomMemberRepository;
 import com.brainstorm.brainstorm_api.repository.RoomRepository;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RoomMemberService {
 
     private final RoomMemberRepository roomMemberRepository;
@@ -28,7 +29,7 @@ public class RoomMemberService {
         return roomMemberRepository.countByRoomId(roomId);
     }
 
-    public RoomMember save(Long roomId, Long userId) {
+    public RoomMember save(Long roomId, UUID userId) {
         Room room = roomRepository.findById(roomId).orElseThrow();
         long roomMembersCount = getRoomMembersCount(room.getId());
         if (roomMembersCount >= room.getTotalUserCount()) {
@@ -44,7 +45,7 @@ public class RoomMemberService {
     }
 
     @Transactional
-    public void delete(Long roomId, Long userId) {
+    public void delete(Long roomId, UUID userId) {
         roomMemberRepository.deleteByRoomIdAndUserId(roomId, userId);
     }
 }

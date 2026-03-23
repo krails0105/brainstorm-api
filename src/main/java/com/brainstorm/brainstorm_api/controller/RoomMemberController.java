@@ -4,7 +4,8 @@ import com.brainstorm.brainstorm_api.entity.RoomMember;
 import com.brainstorm.brainstorm_api.service.RoomMemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Room Member", description = "룸 멤버 관리")
 @RestController
 @RequestMapping("/api/rooms/{roomId}/members")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RoomMemberController {
 
     private final RoomMemberService roomMemberService;
@@ -29,14 +30,14 @@ public class RoomMemberController {
 
     @PostMapping("/{userId}")
     public ResponseEntity<RoomMember> addRoomMember(@PathVariable Long roomId,
-        @PathVariable Long userId) {
+        @PathVariable UUID userId) {
         RoomMember save = roomMemberService.save(roomId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(save);
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteRoomMember(@PathVariable Long roomId,
-        @PathVariable Long userId) {
+        @PathVariable UUID userId) {
         roomMemberService.delete(roomId, userId);
         return ResponseEntity.noContent().build();
     }

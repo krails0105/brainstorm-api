@@ -4,7 +4,7 @@ import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.service.RoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Room", description = "브레인스토밍 룸 CRUD")
 @RestController
 @RequestMapping("/api/rooms")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RoomController {
 
     private final RoomService roomService;

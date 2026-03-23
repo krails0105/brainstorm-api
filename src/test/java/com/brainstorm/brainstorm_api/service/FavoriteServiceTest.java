@@ -36,7 +36,8 @@ class FavoriteServiceTest {
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setName("testUser");
+        testUser.setEmail("test@example.com");
+        testUser.setNickname("testUser");
         testUser.setPassword("password");
         userRepository.save(testUser);
 

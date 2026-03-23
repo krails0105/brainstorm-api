@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleConflict(DataIntegrityViolationException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Duplicated Data");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Data Conflict");
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -34,6 +34,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RoomFullException.class)
     public ResponseEntity<String> handleRoomFullException(RoomFullException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<String> handleDuplicateEmailException(DuplicateEmailException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<String> handleInvalidCredentialsException(InvalidCredentialsException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

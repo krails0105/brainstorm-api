@@ -35,7 +35,8 @@ class RoomServiceTest {
     void setUp() {
         // 테스트용 유저 생성
         testUser = new User();
-        testUser.setName("testUser");
+        testUser.setEmail("test@example.com");
+        testUser.setNickname("testUser");
         testUser.setPassword("password");
         userRepository.save(testUser);
     }
