@@ -1,7 +1,9 @@
 package com.brainstorm.brainstorm_api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.brainstorm.brainstorm_api.common.exception.UnauthorizedAccessException;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
@@ -30,30 +32,40 @@ class RoomServiceTest {
     private UserRepository userRepository;
 
     private User testUser;
+    private User otherUser;
 
     @BeforeEach
     void setUp() {
-        // 테스트용 유저 생성
         testUser = new User();
         testUser.setEmail("test@example.com");
         testUser.setNickname("testUser");
         testUser.setPassword("password");
         userRepository.save(testUser);
+
+        otherUser = new User();
+        otherUser.setEmail("other@example.com");
+        otherUser.setNickname("otherUser");
+        otherUser.setPassword("password");
+        userRepository.save(otherUser);
+    }
+
+    private RoomRequest createRoomRequest(String name, String topic) {
+        RoomRequest request = new RoomRequest();
+        request.setName(name);
+        request.setTopic(topic);
+        request.setIsPublic(true);
+        return request;
     }
 
     @Test
     void save_shouldCreateRoomAndAddOwnerAsMember() {
-        // given - 룸 생성 요청 준비
-        RoomRequest request = new RoomRequest();
-        request.setOwner(testUser);
-        request.setName("Test Room");
-        request.setTopic("Test Topic");
-        request.setIsPublic(true);
+        // given
+        RoomRequest request = createRoomRequest("Test Room", "Test Topic");
 
-        // when - 룸 생성
-        Room saved = roomService.save(request);
+        // when
+        Room saved = roomService.save(request, testUser.getId());
 
-        // then - 룸이 저장되었는지 확인
+        // then
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo("Test Room");
         assertThat(saved.getTopic()).isEqualTo("Test Topic");
@@ -62,82 +74,75 @@ class RoomServiceTest {
 
     @Test
     void getRooms_shouldReturnPagedRooms() {
-        // given - 룸 2개 생성
-        RoomRequest request1 = new RoomRequest();
-        request1.setOwner(testUser);
-        request1.setName("Room 1");
-        request1.setTopic("Topic 1");
-        request1.setIsPublic(true);
-        roomService.save(request1);
+        // given
+        roomService.save(createRoomRequest("Room 1", "Topic 1"), testUser.getId());
+        roomService.save(createRoomRequest("Room 2", "Topic 2"), testUser.getId());
 
-        RoomRequest request2 = new RoomRequest();
-        request2.setOwner(testUser);
-        request2.setName("Room 2");
-        request2.setTopic("Topic 2");
-        request2.setIsPublic(true);
-        roomService.save(request2);
-
-        // when - 페이징 조회
+        // when
         Page<Room> rooms = roomService.getRooms(PageRequest.of(0, 10));
 
-        // then - 2개 이상 존재하는지 확인
+        // then
         assertThat(rooms.getTotalElements()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
     void getRoomById_shouldReturnRoom() {
-        // given - 룸 생성
-        RoomRequest request = new RoomRequest();
-        request.setOwner(testUser);
-        request.setName("Find Me");
-        request.setTopic("Topic");
-        request.setIsPublic(true);
-        Room saved = roomService.save(request);
+        // given
+        Room saved = roomService.save(createRoomRequest("Find Me", "Topic"), testUser.getId());
 
-        // when - ID로 조회
+        // when
         Optional<Room> found = roomService.getRoomById(saved.getId());
 
-        // then - 조회 결과 확인
+        // then
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("Find Me");
     }
 
     @Test
     void update_shouldChangeNameAndTopic() {
-        // given - 룸 생성
-        RoomRequest request = new RoomRequest();
-        request.setOwner(testUser);
-        request.setName("Old Name");
-        request.setTopic("Old Topic");
-        request.setIsPublic(true);
-        Room saved = roomService.save(request);
+        // given
+        Room saved = roomService.save(createRoomRequest("Old Name", "Old Topic"), testUser.getId());
 
-        // when - 이름과 주제 변경
-        Room updateData = new Room();
-        updateData.setName("New Name");
-        updateData.setTopic("New Topic");
-        Room updated = roomService.update(saved.getId(), updateData);
+        // when - owner가 수정
+        RoomRequest updateRequest = createRoomRequest("New Name", "New Topic");
+        Room updated = roomService.update(saved.getId(), updateRequest, testUser.getId());
 
-        // then - 변경 확인
+        // then
         assertThat(updated.getName()).isEqualTo("New Name");
         assertThat(updated.getTopic()).isEqualTo("New Topic");
     }
 
     @Test
+    void update_shouldThrowWhenNotOwner() {
+        // given - testUser가 만든 룸
+        Room saved = roomService.save(createRoomRequest("Room", "Topic"), testUser.getId());
+
+        // when & then - otherUser가 수정 시도 → 권한 없음
+        RoomRequest updateRequest = createRoomRequest("Hacked", "Hacked");
+        assertThatThrownBy(() -> roomService.update(saved.getId(), updateRequest, otherUser.getId()))
+            .isInstanceOf(UnauthorizedAccessException.class);
+    }
+
+    @Test
     void delete_shouldRemoveRoom() {
-        // given - 룸 생성
-        RoomRequest request = new RoomRequest();
-        request.setOwner(testUser);
-        request.setName("Delete Me");
-        request.setTopic("Topic");
-        request.setIsPublic(true);
-        Room saved = roomService.save(request);
+        // given
+        Room saved = roomService.save(createRoomRequest("Delete Me", "Topic"), testUser.getId());
 
-        // when - 삭제
-        roomService.delete(saved.getId());
+        // when - owner가 삭제
+        roomService.delete(saved.getId(), testUser.getId());
 
-        // then - 조회 불가 확인
+        // then
         Optional<Room> found = roomService.getRoomById(saved.getId());
         assertThat(found).isEmpty();
+    }
+
+    @Test
+    void delete_shouldThrowWhenNotOwner() {
+        // given - testUser가 만든 룸
+        Room saved = roomService.save(createRoomRequest("Room", "Topic"), testUser.getId());
+
+        // when & then - otherUser가 삭제 시도 → 권한 없음
+        assertThatThrownBy(() -> roomService.delete(saved.getId(), otherUser.getId()))
+            .isInstanceOf(UnauthorizedAccessException.class);
     }
 }

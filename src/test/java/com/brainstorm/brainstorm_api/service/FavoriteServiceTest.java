@@ -42,11 +42,10 @@ class FavoriteServiceTest {
         userRepository.save(testUser);
 
         RoomRequest roomRequest = new RoomRequest();
-        roomRequest.setOwner(testUser);
         roomRequest.setName("Test Room");
         roomRequest.setTopic("Topic");
         roomRequest.setIsPublic(true);
-        testRoom = roomService.save(roomRequest);
+        testRoom = roomService.save(roomRequest, testUser.getId());
     }
 
     @Test

@@ -57,7 +57,7 @@ class AuthServiceTest {
     void 로그인_성공() {
         authService.signUp(createSignupRequest("login@example.com", "password123", "로그인유저"));
 
-        LoginResponse response = authService.signIn(
+        LoginResponse response = authService.logIn(
             createLoginRequest("login@example.com", "password123"));
 
         assertThat(response.getAccessToken()).isNotBlank();
@@ -68,14 +68,14 @@ class AuthServiceTest {
     void 잘못된_비밀번호_로그인_실패() {
         authService.signUp(createSignupRequest("wrong@example.com", "password123", "유저"));
 
-        assertThatThrownBy(() -> authService.signIn(
+        assertThatThrownBy(() -> authService.logIn(
             createLoginRequest("wrong@example.com", "wrongpassword")))
             .isInstanceOf(InvalidCredentialsException.class);
     }
 
     @Test
     void 존재하지_않는_이메일_로그인_실패() {
-        assertThatThrownBy(() -> authService.signIn(
+        assertThatThrownBy(() -> authService.logIn(
             createLoginRequest("noone@example.com", "password123")))
             .isInstanceOf(InvalidCredentialsException.class);
     }

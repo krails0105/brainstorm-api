@@ -48,11 +48,10 @@ class RoomMemberServiceTest {
         userRepository.save(member);
 
         RoomRequest roomRequest = new RoomRequest();
-        roomRequest.setOwner(owner);
         roomRequest.setName("Test Room");
         roomRequest.setTopic("Topic");
         roomRequest.setIsPublic(true);
-        room = roomService.save(roomRequest);
+        room = roomService.save(roomRequest, owner.getId());
     }
 
     @Test

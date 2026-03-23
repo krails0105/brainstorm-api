@@ -44,11 +44,7 @@ public class AuthService {
     public LoginResponse logIn(LoginRequest loginRequest) {
         String email = loginRequest.getEmail();
 
-        User user = userRepository.findByEmail(email).orElse(null);
-        if (user == null) {
-            throw new InvalidCredentialsException("Not Found Email");
-        }
-
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new InvalidCredentialsException("Not Found Email"));
         String password = loginRequest.getPassword();
         String userPassword = user.getPassword();
         if (!passwordEncoder.matches(password, userPassword)) {
@@ -60,20 +56,12 @@ public class AuthService {
         return new LoginResponse(token, userInfo);
     }
 
-    public void logOut() {
-
-    }
-
     public UserInfo tokenValidation() {
         UUID id = (UUID) SecurityContextHolder.getContext()
             .getAuthentication()
             .getPrincipal();
 
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            throw new InvalidCredentialsException("Invalid token");
-        }
-
+        User user = userRepository.findById(id).orElseThrow(() -> new InvalidCredentialsException("Invalid token"));
         return UserInfo.ofUser(user);
     }
 }

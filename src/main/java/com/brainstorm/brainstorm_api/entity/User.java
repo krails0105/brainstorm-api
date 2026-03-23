@@ -1,6 +1,7 @@
 package com.brainstorm.brainstorm_api.entity;
 
 import com.brainstorm.brainstorm_api.dto.SignupRequest;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +34,7 @@ public class User {
     private String nickname;
 
     @Column
+    @JsonIgnore
     private String password;
 
     private LocalDateTime updatedAt;

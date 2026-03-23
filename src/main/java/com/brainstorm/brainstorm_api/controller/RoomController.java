@@ -4,6 +4,7 @@ import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.service.RoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,19 +50,31 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<Room> createRoom(@RequestBody RoomRequest roomRequest) {
-        Room saved = roomService.save(roomRequest);
+        UUID userId = (UUID) SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getPrincipal();
+
+        Room saved = roomService.save(roomRequest, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody Room room) {
-        Room save = roomService.update(id, room);
+    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody RoomRequest roomRequest) {
+        UUID userId = (UUID) SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getPrincipal();
+
+        Room save = roomService.update(id, roomRequest, userId);
         return ResponseEntity.ok(save);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        roomService.delete(id);
+        UUID userId = (UUID) SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getPrincipal();
+
+        roomService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 
