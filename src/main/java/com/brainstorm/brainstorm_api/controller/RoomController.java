@@ -2,11 +2,11 @@ package com.brainstorm.brainstorm_api.controller;
 
 import com.brainstorm.brainstorm_api.common.ApiResponse;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
+import com.brainstorm.brainstorm_api.dto.ShareResponse;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.service.RoomService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -79,9 +79,9 @@ public class RoomController {
     }
 
     @PostMapping("/{id}/share")
-    public ResponseEntity<ApiResponse<Map<String, String>>> addShareToken(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ShareResponse>> addShareToken(@PathVariable Long id) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String shareUrl = roomService.getShareToken(id, userId);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("shareUrl", shareUrl)));
+        return ResponseEntity.ok(ApiResponse.success(new ShareResponse(shareUrl)));
     }
 }
