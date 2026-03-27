@@ -48,3 +48,4 @@ Thumbs.db
 application-local.yml
 application-local.properties
 *-secret.*
+client_secret_*.json

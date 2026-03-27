@@ -122,4 +122,61 @@ class KeywordServiceTest {
         assertThatThrownBy(() -> keywordService.delete(saved.getId(), member.getId()))
             .isInstanceOf(UnauthorizedAccessException.class);
     }
+
+    @Test
+    void 좋아요_토글_추가() {
+        Keyword saved = keywordService.save(room.getId(), member.getId(), createKeywordRequest("AI"));
+
+        KeywordResponse response = keywordService.toggleLike(saved.getId(), owner.getId());
+
+        assertThat(response.isLiked()).isTrue();
+        assertThat(response.getLikeCount()).isEqualTo(1);
+        assertThat(response.getId()).isEqualTo(saved.getId());
+    }
+
+    @Test
+    void 좋아요_토글_취소() {
+        Keyword saved = keywordService.save(room.getId(), member.getId(), createKeywordRequest("AI"));
+
+        // 좋아요 추가 후 취소
+        keywordService.toggleLike(saved.getId(), owner.getId());
+        KeywordResponse response = keywordService.toggleLike(saved.getId(), owner.getId());
+
+        assertThat(response.isLiked()).isFalse();
+        assertThat(response.getLikeCount()).isEqualTo(0);
+    }
+
+    @Test
+    void 여러_유저가_좋아요() {
+        Keyword saved = keywordService.save(room.getId(), member.getId(), createKeywordRequest("AI"));
+
+        keywordService.toggleLike(saved.getId(), owner.getId());
+        KeywordResponse response = keywordService.toggleLike(saved.getId(), member.getId());
+
+        assertThat(response.getLikeCount()).isEqualTo(2);
+    }
+
+    @Test
+    void 키워드_목록_조회_시_좋아요_정보_포함() {
+        Keyword saved = keywordService.save(room.getId(), member.getId(), createKeywordRequest("AI"));
+        keywordService.toggleLike(saved.getId(), owner.getId());
+
+        List<KeywordResponse> keywords = keywordService.getKeywordsByRoomId(room.getId(), owner.getId());
+
+        assertThat(keywords).hasSize(1);
+        assertThat(keywords.get(0).getLikeCount()).isEqualTo(1);
+        assertThat(keywords.get(0).isLiked()).isTrue();
+    }
+
+    @Test
+    void 키워드_목록_조회_시_좋아요_안누른_유저는_liked_false() {
+        Keyword saved = keywordService.save(room.getId(), member.getId(), createKeywordRequest("AI"));
+        keywordService.toggleLike(saved.getId(), owner.getId());
+
+        // member는 좋아요 안 누름
+        List<KeywordResponse> keywords = keywordService.getKeywordsByRoomId(room.getId(), member.getId());
+
+        assertThat(keywords.get(0).getLikeCount()).isEqualTo(1);
+        assertThat(keywords.get(0).isLiked()).isFalse();
+    }
 }
