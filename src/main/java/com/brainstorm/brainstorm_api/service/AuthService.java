@@ -47,6 +47,10 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new InvalidCredentialsException("Not Found Email"));
         String password = loginRequest.getPassword();
         String userPassword = user.getPassword();
+        if (user.getPassword() == null) {
+            throw new InvalidCredentialsException("소셜 로그인으로 가입된 계정입니다.");
+        }
+
         if (!passwordEncoder.matches(password, userPassword)) {
             throw new InvalidCredentialsException("Not Matched Password");
         }

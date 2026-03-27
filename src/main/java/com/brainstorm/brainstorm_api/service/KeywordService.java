@@ -77,6 +77,7 @@ public class KeywordService {
         User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("Not Found User"));
 
         KeywordResponse keywordResponse = new KeywordResponse();
+        keywordResponse.setId(keywordId);
         keywordResponse.setLiked(!exists);
         keywordResponse.setContent(keyword.getContent());
         keywordResponse.setNickname(user.getNickname());
