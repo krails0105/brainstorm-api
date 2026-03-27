@@ -1,6 +1,7 @@
 package com.brainstorm.brainstorm_api.controller;
 
 import com.brainstorm.brainstorm_api.entity.RoomMember;
+import com.brainstorm.brainstorm_api.service.KeywordService;
 import com.brainstorm.brainstorm_api.service.RoomMemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomMemberController {
 
     private final RoomMemberService roomMemberService;
+    private final KeywordService keywordService;
 
     @GetMapping
     public List<RoomMember> listRoomMember(@PathVariable Long roomId) {

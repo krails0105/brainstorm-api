@@ -36,6 +36,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
+    @ExceptionHandler(KeywordFullException.class)
+    public ResponseEntity<String> handleKeywordFullException(KeywordFullException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
 @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<String> handleDuplicateEmailException(DuplicateEmailException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
