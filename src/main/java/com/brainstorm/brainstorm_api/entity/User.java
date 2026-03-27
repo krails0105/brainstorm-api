@@ -37,6 +37,10 @@ public class User {
     @JsonIgnore
     private String password;
 
+    private String provider;
+
+    private String providerId;
+
     private LocalDateTime updatedAt;
 
     private LocalDateTime createdAt;
@@ -57,6 +61,7 @@ public class User {
         user.setEmail(signupRequest.getEmail());
         user.setPassword(signupRequest.getPassword());
         user.setNickname(signupRequest.getNickname());
+        user.setProvider("LOCAL");
 
         return user;
     }

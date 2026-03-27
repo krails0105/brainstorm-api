@@ -1,0 +1,32 @@
+package com.brainstorm.brainstorm_api.config.oauth;
+
+import com.brainstorm.brainstorm_api.common.exception.InvalidCredentialsException;
+import com.brainstorm.brainstorm_api.config.jwt.JwtProvider;
+import com.brainstorm.brainstorm_api.entity.User;
+import com.brainstorm.brainstorm_api.repository.UserRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oAuth2User.getAttribute("email");
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new InvalidCredentialsException("Not Found User"));
+        String token = jwtProvider.createToken(user.getId());
+        response.sendRedirect("https://brainstorming-chat-sigma.vercel.app/oauth/callback?token=" + token);
+    }
+}

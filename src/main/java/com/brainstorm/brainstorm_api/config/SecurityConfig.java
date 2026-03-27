@@ -1,6 +1,8 @@
 package com.brainstorm.brainstorm_api.config;
 
 import com.brainstorm.brainstorm_api.config.jwt.JwtFilter;
+import com.brainstorm.brainstorm_api.config.oauth.OAuth2SuccessHandler;
+import com.brainstorm.brainstorm_api.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -37,11 +41,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                 // Swagger 문서 경로도 인증 없이 접근 가능
                 .requestMatchers("/docs/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers( "/oauth2/**", "/login/oauth2/**").permitAll()
                 // H2 콘솔 (개발용 DB 관리 화면)
                 .requestMatchers("/h2-console/**").permitAll()
                 // 위에서 명시하지 않은 나머지 모든 경로는 인증 필요
                 // → SecurityContext에 authentication이 없으면 403 반환
                 .anyRequest().authenticated())
+            .oauth2Login(oauth -> oauth
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .successHandler(oAuth2SuccessHandler))
             // JwtFilter를 Spring Security 기본 인증 필터(UsernamePasswordAuthenticationFilter) 앞에 추가
             // → 요청이 들어오면 JwtFilter가 먼저 토큰을 검증하고 SecurityContext에 인증 정보를 설정
             // → 그 다음 Spring Security가 인증 여부를 확인
