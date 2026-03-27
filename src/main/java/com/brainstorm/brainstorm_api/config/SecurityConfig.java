@@ -34,7 +34,7 @@ public class SecurityConfig {
             // CORS 활성화 — WebConfig에 설정한 CORS 규칙(허용 도메인, 메서드 등)을 Security에도 적용
             .cors(Customizer.withDefaults())
             // 세션 사용 안 함 — JWT는 Stateless 인증이므로 서버에 세션을 저장하지 않음
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             // 경로별 인증 규칙 설정
             .authorizeHttpRequests(auth -> auth
                 // 회원가입/로그인은 토큰 없이 접근 가능 (인증 전이니까)

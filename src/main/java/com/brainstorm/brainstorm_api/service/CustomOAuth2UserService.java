@@ -1,8 +1,8 @@
 package com.brainstorm.brainstorm_api.service;
 
+import com.brainstorm.brainstorm_api.config.oauth.OAuth2UserInfo;
 import com.brainstorm.brainstorm_api.entity.User;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -20,26 +20,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        String email = "";
-        String name = "";
-        String sub = "";
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        if ("google".equals(registrationId)) {
-            email = oAuth2User.getAttribute("email");
-            name = oAuth2User.getAttribute("name");
-            sub = oAuth2User.getAttribute("sub");
-        } else if ("kakao".equals(registrationId)) {
-            sub = String.valueOf(oAuth2User.getAttribute("id"));
-            Map<String, Object> account = oAuth2User.getAttribute("kakao_account");
-            email = (String) account.get("email");
-            Map<String, Object> properties = oAuth2User.getAttribute("properties");
-            name = (String) properties.get("nickname");
-        } else if ("naver".equals(registrationId)) {
-            Map<String, Object> response = oAuth2User.getAttribute("response");
-            sub = (String) response.get("id");
-            email = (String) response.get("email");
-            name = (String) response.get("name");
-        }
+        OAuth2UserInfo userInfo = OAuth2UserInfo.of(registrationId, oAuth2User.getAttributes());
+
+        String email = userInfo.getEmail();
+        String name = userInfo.getNickname();
+        String sub = userInfo.getProviderId();
 
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
