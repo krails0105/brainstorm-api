@@ -1,6 +1,9 @@
 package com.brainstorm.brainstorm_api.entity;
 
+import com.brainstorm.brainstorm_api.common.RoomRole;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,6 +37,9 @@ public class RoomMember {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    private RoomRole role;
 
     private LocalDateTime createdAt;
 

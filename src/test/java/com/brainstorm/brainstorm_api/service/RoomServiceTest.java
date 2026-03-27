@@ -53,6 +53,7 @@ class RoomServiceTest {
         RoomRequest request = new RoomRequest();
         request.setName(name);
         request.setTopic(topic);
+        request.setTotalUserCount(10);
         request.setIsPublic(true);
         return request;
     }

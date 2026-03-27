@@ -45,6 +45,7 @@ class FavoriteServiceTest {
         roomRequest.setName("Test Room");
         roomRequest.setTopic("Topic");
         roomRequest.setIsPublic(true);
+        roomRequest.setTotalUserCount(10);
         testRoom = roomService.save(roomRequest, testUser.getId());
     }
 

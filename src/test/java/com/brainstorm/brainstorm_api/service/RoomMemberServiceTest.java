@@ -3,6 +3,7 @@ package com.brainstorm.brainstorm_api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.brainstorm.brainstorm_api.common.RoomRole;
 import com.brainstorm.brainstorm_api.common.exception.RoomFullException;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
@@ -51,6 +52,7 @@ class RoomMemberServiceTest {
         roomRequest.setName("Test Room");
         roomRequest.setTopic("Topic");
         roomRequest.setIsPublic(true);
+        roomRequest.setTotalUserCount(10);
         room = roomService.save(roomRequest, owner.getId());
     }
 
@@ -60,7 +62,7 @@ class RoomMemberServiceTest {
         room.setTotalUserCount(11);
 
         // when - 멤버 추가
-        RoomMember saved = roomMemberService.save(room.getId(), member.getId());
+        RoomMember saved = roomMemberService.save(room.getId(), member.getId(), RoomRole.MEMBER);
 
         // then - 멤버 추가 확인
         assertThat(saved.getId()).isNotNull();
@@ -92,7 +94,7 @@ class RoomMemberServiceTest {
         room.setTotalUserCount(1);
 
         // when & then - 인원 초과 시 RoomFullException 발생
-        assertThatThrownBy(() -> roomMemberService.save(room.getId(), member.getId()))
+        assertThatThrownBy(() -> roomMemberService.save(room.getId(), member.getId(), RoomRole.MEMBER))
             .isInstanceOf(RoomFullException.class)
             .hasMessage("Max Member Exceed!");
     }
@@ -101,7 +103,7 @@ class RoomMemberServiceTest {
     void delete_shouldRemoveMember() {
         // given - 멤버 추가
         room.setTotalUserCount(11);
-        roomMemberService.save(room.getId(), member.getId());
+        roomMemberService.save(room.getId(), member.getId(), RoomRole.MEMBER);
         assertThat(roomMemberService.getRoomMembersCount(room.getId())).isEqualTo(2);
 
         // when - 멤버 삭제

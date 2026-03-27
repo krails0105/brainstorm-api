@@ -1,5 +1,6 @@
 package com.brainstorm.brainstorm_api.service;
 
+import com.brainstorm.brainstorm_api.common.RoomRole;
 import com.brainstorm.brainstorm_api.common.exception.RoomFullException;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.RoomMember;
@@ -29,7 +30,7 @@ public class RoomMemberService {
         return roomMemberRepository.countByRoomId(roomId);
     }
 
-    public RoomMember save(Long roomId, UUID userId) {
+    public RoomMember save(Long roomId, UUID userId, RoomRole role) {
         Room room = roomRepository.findById(roomId).orElseThrow();
         long roomMembersCount = getRoomMembersCount(room.getId());
         if (roomMembersCount >= room.getTotalUserCount()) {
@@ -40,6 +41,7 @@ public class RoomMemberService {
         RoomMember roomMember = new RoomMember();
         roomMember.setRoom(room);
         roomMember.setUser(user);
+        roomMember.setRole(role);
 
         return roomMemberRepository.save(roomMember);
     }

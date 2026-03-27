@@ -1,7 +1,7 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.common.RoomRole;
 import com.brainstorm.brainstorm_api.entity.RoomMember;
-import com.brainstorm.brainstorm_api.service.KeywordService;
 import com.brainstorm.brainstorm_api.service.RoomMemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoomMemberController {
 
     private final RoomMemberService roomMemberService;
-    private final KeywordService keywordService;
 
     @GetMapping
     public List<RoomMember> listRoomMember(@PathVariable Long roomId) {
@@ -31,16 +30,15 @@ public class RoomMemberController {
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<RoomMember> addRoomMember(@PathVariable Long roomId,
-        @PathVariable UUID userId) {
-        RoomMember save = roomMemberService.save(roomId, userId);
+    public ResponseEntity<RoomMember> addRoomMember(@PathVariable Long roomId, @PathVariable UUID userId) {
+        RoomMember save = roomMemberService.save(roomId, userId, RoomRole.MEMBER);
         return ResponseEntity.status(HttpStatus.CREATED).body(save);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteRoomMember(@PathVariable Long roomId,
-        @PathVariable UUID userId) {
+    public ResponseEntity<Void> deleteRoomMember(@PathVariable Long roomId, @PathVariable UUID userId) {
         roomMemberService.delete(roomId, userId);
         return ResponseEntity.noContent().build();
     }
+
 }

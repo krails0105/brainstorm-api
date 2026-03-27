@@ -1,5 +1,6 @@
 package com.brainstorm.brainstorm_api.service;
 
+import com.brainstorm.brainstorm_api.common.RoomRole;
 import com.brainstorm.brainstorm_api.common.exception.UnauthorizedAccessException;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
@@ -10,6 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomMemberService roomMemberService;
     private final UserRepository userRepository;
+
+    @Value("${app.frontend-url}")
+    private String appUrl;
 
     public Page<Room> getRooms(Pageable pageable) {
         return roomRepository.findAll(pageable);
@@ -39,11 +44,15 @@ public class RoomService {
         newRoom.setOwner(user);
         newRoom.setName(roomRequest.getName());
         newRoom.setTopic(roomRequest.getTopic());
-        newRoom.setTotalUserCount(10);
+        int totalUserCount = roomRequest.getTotalUserCount();
+        if (totalUserCount < 1 || totalUserCount > 12) {
+            throw new IllegalStateException("Total user count have to be between 1 and 12");
+        }
+        newRoom.setTotalUserCount(totalUserCount);
         newRoom.setIsPublic(roomRequest.getIsPublic());
         Room savedRoom = roomRepository.save(newRoom);
 
-        roomMemberService.save(savedRoom.getId(), savedRoom.getOwner().getId());
+        roomMemberService.save(savedRoom.getId(), savedRoom.getOwner().getId(), RoomRole.OWNER);
         return savedRoom;
     }
 
@@ -68,5 +77,18 @@ public class RoomService {
         }
 
         roomRepository.deleteById(id);
+    }
+
+    public String getShareToken(Long roomId, UUID userId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new NoSuchElementException("Not Found Room"));
+
+        if (!room.getOwner().getId().equals(userId)) {
+            throw new UnauthorizedAccessException("룸 관리자만 접근할 수 있습니다");
+        }
+
+        String shareToken = UUID.randomUUID().toString();
+        room.setShareToken(shareToken);
+        roomRepository.save(room);
+        return appUrl + "/join/" + shareToken;
     }
 }

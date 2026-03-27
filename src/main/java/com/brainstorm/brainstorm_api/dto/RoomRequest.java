@@ -12,4 +12,6 @@ public class RoomRequest {
     private String topic;
 
     private Boolean isPublic;
+
+    private int totalUserCount;
 }

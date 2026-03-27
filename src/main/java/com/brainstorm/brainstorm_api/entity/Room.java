@@ -2,6 +2,7 @@ package com.brainstorm.brainstorm_api.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +14,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,12 +49,16 @@ public class Room {
 
     private Boolean isPublic;
 
+    @Column(unique = true)
+    private String shareToken;
+
     private LocalDateTime updatedAt;
 
     private LocalDateTime createdAt;
 
     @PrePersist
     void onCreate() {
+        this.shareToken = UUID.randomUUID().toString();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
     }

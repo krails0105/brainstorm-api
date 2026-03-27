@@ -78,4 +78,10 @@ public class RoomController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/share")
+    public ResponseEntity<String> addShareToken(@PathVariable Long id) {
+        UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String shareToken = roomService.getShareToken(id, userId);
+        return ResponseEntity.ok(shareToken);
+    }
 }

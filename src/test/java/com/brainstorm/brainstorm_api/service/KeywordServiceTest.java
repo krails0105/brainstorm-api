@@ -54,6 +54,7 @@ class KeywordServiceTest {
         roomRequest.setName("Test Room");
         roomRequest.setTopic("Topic");
         roomRequest.setIsPublic(true);
+        roomRequest.setTotalUserCount(10);
         room = roomService.save(roomRequest, owner.getId());
     }
 
