@@ -66,6 +66,12 @@ public class RoomService {
 
         updateRoom.setName(roomRequest.getName());
         updateRoom.setTopic(roomRequest.getTopic());
+        updateRoom.setIsPublic(roomRequest.getIsPublic());
+        int totalUserCount = roomRequest.getTotalUserCount();
+        if (totalUserCount < 1 || totalUserCount > 12) {
+            throw new IllegalStateException("Total user count have to be between 1 and 12");
+        }
+        updateRoom.setTotalUserCount(totalUserCount);
         return roomRepository.save(updateRoom);
     }
 
@@ -83,7 +89,7 @@ public class RoomService {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new NoSuchElementException("Not Found Room"));
 
         if (!room.getOwner().getId().equals(userId)) {
-            throw new UnauthorizedAccessException("룸 관리자만 접근할 수 있습니다");
+            throw new UnauthorizedAccessException("Only access for room owner");
         }
 
         String shareToken = UUID.randomUUID().toString();

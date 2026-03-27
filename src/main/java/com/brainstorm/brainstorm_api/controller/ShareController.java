@@ -1,5 +1,6 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.dto.RoomResponse;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.service.ShareService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,9 +22,9 @@ public class ShareController {
     private final ShareService shareService;
 
     @GetMapping("/{token}")
-    public ResponseEntity<Long> joinRoomByToken(@PathVariable String token) {
+    public ResponseEntity<RoomResponse> joinRoomByToken(@PathVariable String token) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Room room = shareService.joinRoomByShareToken(token, userId);
-        return ResponseEntity.ok(room.getId());
+        return ResponseEntity.ok(RoomResponse.of(room));
     }
 }

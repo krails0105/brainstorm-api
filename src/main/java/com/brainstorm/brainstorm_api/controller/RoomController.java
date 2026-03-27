@@ -4,6 +4,7 @@ import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.service.RoomService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -79,9 +80,9 @@ public class RoomController {
     }
 
     @PostMapping("/{id}/share")
-    public ResponseEntity<String> addShareToken(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> addShareToken(@PathVariable Long id) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String shareToken = roomService.getShareToken(id, userId);
-        return ResponseEntity.ok(shareToken);
+        String shareUrl = roomService.getShareToken(id, userId);
+        return ResponseEntity.ok(Map.of("shareUrl", shareUrl));
     }
 }
