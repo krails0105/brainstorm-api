@@ -1,11 +1,13 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.common.ApiResponse;
 import com.brainstorm.brainstorm_api.dto.LoginRequest;
 import com.brainstorm.brainstorm_api.dto.LoginResponse;
 import com.brainstorm.brainstorm_api.dto.LoginResponse.UserInfo;
 import com.brainstorm.brainstorm_api.dto.SignupRequest;
 import com.brainstorm.brainstorm_api.dto.SignupResponse;
 import com.brainstorm.brainstorm_api.service.AuthService;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,20 +27,20 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponse> signUp(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<ApiResponse<SignupResponse>> signUp(@Valid @RequestBody SignupRequest signupRequest) {
         SignupResponse signupResponse = authService.signUp(signupRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(signupResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, signupResponse));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse = authService.logIn(loginRequest);
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
     }
 
     @GetMapping("/status")
-    public ResponseEntity<LoginResponse.UserInfo> status() {
+    public ResponseEntity<ApiResponse<UserInfo>> status() {
         UserInfo userInfo = authService.tokenValidation();
-        return ResponseEntity.ok(userInfo);
+        return ResponseEntity.ok(ApiResponse.success(userInfo));
     }
 }

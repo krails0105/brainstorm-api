@@ -1,5 +1,6 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.common.ApiResponse;
 import com.brainstorm.brainstorm_api.common.RoomRole;
 import com.brainstorm.brainstorm_api.entity.RoomMember;
 import com.brainstorm.brainstorm_api.service.RoomMemberService;
@@ -25,14 +26,14 @@ public class RoomMemberController {
     private final RoomMemberService roomMemberService;
 
     @GetMapping
-    public List<RoomMember> listRoomMember(@PathVariable Long roomId) {
-        return roomMemberService.getRoomMembers(roomId);
+    public ResponseEntity<ApiResponse<List<RoomMember>>> listRoomMember(@PathVariable Long roomId) {
+        return ResponseEntity.ok(ApiResponse.success(roomMemberService.getRoomMembers(roomId)));
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<RoomMember> addRoomMember(@PathVariable Long roomId, @PathVariable UUID userId) {
+    public ResponseEntity<ApiResponse<RoomMember>> addRoomMember(@PathVariable Long roomId, @PathVariable UUID userId) {
         RoomMember save = roomMemberService.save(roomId, userId, RoomRole.MEMBER);
-        return ResponseEntity.status(HttpStatus.CREATED).body(save);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, save));
     }
 
     @DeleteMapping("/{userId}")
@@ -40,5 +41,4 @@ public class RoomMemberController {
         roomMemberService.delete(roomId, userId);
         return ResponseEntity.noContent().build();
     }
-
 }

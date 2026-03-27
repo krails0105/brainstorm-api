@@ -1,9 +1,11 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.common.ApiResponse;
 import com.brainstorm.brainstorm_api.dto.KeywordRequest;
 import com.brainstorm.brainstorm_api.dto.KeywordResponse;
 import com.brainstorm.brainstorm_api.entity.Keyword;
 import com.brainstorm.brainstorm_api.service.KeywordService;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
@@ -28,16 +30,16 @@ public class KeywordController {
     private final KeywordService keywordService;
 
     @GetMapping
-    public List<KeywordResponse> getKeywords(@PathVariable Long roomId) {
+    public ResponseEntity<ApiResponse<List<KeywordResponse>>> getKeywords(@PathVariable Long roomId) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return keywordService.getKeywordsByRoomId(roomId, userId);
+        return ResponseEntity.ok(ApiResponse.success(keywordService.getKeywordsByRoomId(roomId, userId)));
     }
 
     @PostMapping
-    public ResponseEntity<Keyword> addKeyword(@PathVariable Long roomId, @RequestBody KeywordRequest keywordRequest) {
+    public ResponseEntity<ApiResponse<Keyword>> addKeyword(@PathVariable Long roomId, @Valid @RequestBody KeywordRequest keywordRequest) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Keyword keyword = keywordService.save(roomId, userId, keywordRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(keyword);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, keyword));
     }
 
     @DeleteMapping("/{keywordId}")
@@ -48,9 +50,9 @@ public class KeywordController {
     }
 
     @PostMapping("/{keywordId}/like")
-    public ResponseEntity<KeywordResponse> addLike(@PathVariable Long keywordId) {
+    public ResponseEntity<ApiResponse<KeywordResponse>> addLike(@PathVariable Long keywordId) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         KeywordResponse keywordResponse = keywordService.toggleLike(keywordId, userId);
-        return ResponseEntity.ok(keywordResponse);
+        return ResponseEntity.ok(ApiResponse.success(keywordResponse));
     }
 }

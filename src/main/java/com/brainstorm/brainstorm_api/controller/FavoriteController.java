@@ -1,5 +1,6 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.common.ApiResponse;
 import com.brainstorm.brainstorm_api.entity.Favorite;
 import com.brainstorm.brainstorm_api.service.FavoriteService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +30,7 @@ public class FavoriteController {
     private final FavoriteService favoriteService;
 
     @GetMapping
-    public Page<Favorite> listFavorite(@RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<ApiResponse<Page<Favorite>>> listFavorite(@RequestParam(defaultValue = "0") int page) {
         UUID userId = (UUID) SecurityContextHolder.getContext()
             .getAuthentication()
             .getPrincipal();
@@ -37,17 +38,17 @@ public class FavoriteController {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
 
-        return favoriteService.getFavoriteByUserId(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success(favoriteService.getFavoriteByUserId(userId, pageable)));
     }
 
     @PostMapping("/{roomId}")
-    public ResponseEntity<Favorite> createFavorite(@PathVariable Long roomId) {
+    public ResponseEntity<ApiResponse<Favorite>> createFavorite(@PathVariable Long roomId) {
         UUID userId = (UUID) SecurityContextHolder.getContext()
             .getAuthentication()
             .getPrincipal();
 
         Favorite save = favoriteService.save(userId, roomId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(save);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, save));
     }
 
     @DeleteMapping("/{roomId}")

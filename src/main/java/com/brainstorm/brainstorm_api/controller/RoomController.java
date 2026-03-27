@@ -1,8 +1,10 @@
 package com.brainstorm.brainstorm_api.controller;
 
+import com.brainstorm.brainstorm_api.common.ApiResponse;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.service.RoomService;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import java.util.UUID;
@@ -33,40 +35,37 @@ public class RoomController {
     private final RoomService roomService;
 
     @GetMapping
-    public Page<Room> listRooms(@RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<ApiResponse<Page<Room>>> listRooms(@RequestParam(defaultValue = "0") int page) {
         int pageSize = 10;
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createdAt").descending());
-
-        return roomService.getRooms(pageable);
+        return ResponseEntity.ok(ApiResponse.success(roomService.getRooms(pageable)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Room> getRoom(@PathVariable Long id) {
-        Room room = roomService.getRoomById(id).orElse(null);
-        if (room == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(room);
+    public ResponseEntity<ApiResponse<Room>> getRoom(@PathVariable Long id) {
+        Room room = roomService.getRoomById(id).orElseThrow(
+            () -> new java.util.NoSuchElementException("Not Found Room"));
+        return ResponseEntity.ok(ApiResponse.success(room));
     }
 
     @PostMapping
-    public ResponseEntity<Room> createRoom(@RequestBody RoomRequest roomRequest) {
+    public ResponseEntity<ApiResponse<Room>> createRoom(@Valid @RequestBody RoomRequest roomRequest) {
         UUID userId = (UUID) SecurityContextHolder.getContext()
             .getAuthentication()
             .getPrincipal();
 
         Room saved = roomService.save(roomRequest, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateRoom(@PathVariable Long id, @RequestBody RoomRequest roomRequest) {
+    public ResponseEntity<ApiResponse<Room>> updateRoom(@PathVariable Long id, @Valid @RequestBody RoomRequest roomRequest) {
         UUID userId = (UUID) SecurityContextHolder.getContext()
             .getAuthentication()
             .getPrincipal();
 
         Room save = roomService.update(id, roomRequest, userId);
-        return ResponseEntity.ok(save);
+        return ResponseEntity.ok(ApiResponse.success(save));
     }
 
     @DeleteMapping("/{id}")
@@ -80,9 +79,9 @@ public class RoomController {
     }
 
     @PostMapping("/{id}/share")
-    public ResponseEntity<Map<String, String>> addShareToken(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> addShareToken(@PathVariable Long id) {
         UUID userId = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String shareUrl = roomService.getShareToken(id, userId);
-        return ResponseEntity.ok(Map.of("shareUrl", shareUrl));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("shareUrl", shareUrl)));
     }
 }
