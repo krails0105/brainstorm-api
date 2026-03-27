@@ -11,7 +11,5 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
 
     List<Keyword> findByRoomId(Long roomId);
 
-    List<Keyword> findByRoomIdAndUserId(Long roomId, UUID userID);
-
     long countByRoomIdAndUserId(Long roomId, UUID userId);
 }

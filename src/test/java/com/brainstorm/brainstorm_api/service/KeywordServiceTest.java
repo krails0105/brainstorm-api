@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.brainstorm.brainstorm_api.common.exception.KeywordFullException;
 import com.brainstorm.brainstorm_api.common.exception.UnauthorizedAccessException;
 import com.brainstorm.brainstorm_api.dto.KeywordRequest;
+import com.brainstorm.brainstorm_api.dto.KeywordResponse;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Keyword;
 import com.brainstorm.brainstorm_api.entity.Room;
@@ -76,7 +77,7 @@ class KeywordServiceTest {
         keywordService.save(room.getId(), owner.getId(), createKeywordRequest("AI"));
         keywordService.save(room.getId(), member.getId(), createKeywordRequest("자동화"));
 
-        List<Keyword> keywords = keywordService.getKeywordsByRoomId(room.getId());
+        List<KeywordResponse> keywords = keywordService.getKeywordsByRoomId(room.getId(), owner.getId());
 
         assertThat(keywords).hasSize(2);
     }
@@ -97,7 +98,7 @@ class KeywordServiceTest {
 
         keywordService.delete(saved.getId(), member.getId());
 
-        List<Keyword> keywords = keywordService.getKeywordsByRoomId(room.getId());
+        List<KeywordResponse> keywords = keywordService.getKeywordsByRoomId(room.getId(), member.getId());
         assertThat(keywords).isEmpty();
     }
 
@@ -108,7 +109,7 @@ class KeywordServiceTest {
         // owner가 member의 키워드 삭제
         keywordService.delete(saved.getId(), owner.getId());
 
-        List<Keyword> keywords = keywordService.getKeywordsByRoomId(room.getId());
+        List<KeywordResponse> keywords = keywordService.getKeywordsByRoomId(room.getId(), owner.getId());
         assertThat(keywords).isEmpty();
     }
 
