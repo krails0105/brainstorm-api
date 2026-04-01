@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/docs/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers( "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/chat-test.html").permitAll()
                 // H2 콘솔 (개발용 DB 관리 화면)
                 .requestMatchers("/h2-console/**").permitAll()
                 // 위에서 명시하지 않은 나머지 모든 경로는 인증 필요
