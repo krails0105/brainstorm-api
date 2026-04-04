@@ -22,20 +22,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
 
 	public static void main(String[] args) {
-		// Railway의 DATABASE_URL(postgres://...)을 JDBC 형식(jdbc:postgresql://...)으로 변환
-		String databaseUrl = System.getenv("DATABASE_URL");
-		if (databaseUrl != null) {
-			// postgres:// → postgresql:// 변환 (JDBC는 postgresql만 인식)
-			if (databaseUrl.startsWith("postgres://")) {
-				databaseUrl = databaseUrl.replaceFirst("postgres://", "postgresql://");
-			}
-			// jdbc: 접두사 추가
-			if (!databaseUrl.startsWith("jdbc:")) {
-				databaseUrl = "jdbc:" + databaseUrl;
-			}
-			System.setProperty("JDBC_DATABASE_URL", databaseUrl);
-		}
-
 		SpringApplication.run(Application.class, args);
 	}
 
