@@ -32,6 +32,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	// Actuator: 헬스체크(/actuator/health) 등 앱 상태 모니터링 엔드포인트 제공
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 
 	runtimeOnly 'org.postgresql:postgresql'

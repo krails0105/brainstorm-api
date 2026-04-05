@@ -45,6 +45,9 @@ public class SecurityConfig {
                 .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/chat-test.html").permitAll()
                 // H2 콘솔 (개발용 DB 관리 화면)
+                // Actuator 헬스체크 — Railway가 앱 상태를 확인하는 엔드포인트
+                .requestMatchers("/actuator/health").permitAll()
+                // H2 콘솔 (개발용 DB 관리 화면)
                 .requestMatchers("/h2-console/**").permitAll()
                 // 위에서 명시하지 않은 나머지 모든 경로는 인증 필요
                 // → SecurityContext에 authentication이 없으면 403 반환
