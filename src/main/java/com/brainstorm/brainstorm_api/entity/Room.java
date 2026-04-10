@@ -41,6 +41,11 @@ public class Room {
     @JsonIgnore
     private List<Favorite> favorites;
 
+    // Room 삭제 시 연관된 채팅 메시지도 함께 삭제
+    @OneToMany(mappedBy = "room", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<ChatMessage> chatMessages;
+
     private String name;
 
     private String topic;
