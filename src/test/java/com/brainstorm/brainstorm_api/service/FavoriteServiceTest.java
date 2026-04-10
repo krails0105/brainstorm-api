@@ -8,7 +8,9 @@ import com.brainstorm.brainstorm_api.entity.Favorite;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ class FavoriteServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private User testUser;
     private Room testRoom;
@@ -91,6 +96,35 @@ class FavoriteServiceTest {
     void delete_shouldThrowWhenFavoriteNotFound() {
         // when & then - 존재하지 않는 즐겨찾기 삭제 시 예외 발생
         assertThatThrownBy(() -> favoriteService.delete(testUser.getId(), testRoom.getId()))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void save_shouldThrowWhenDuplicateFavorite() {
+        // given - 즐겨찾기 추가
+        favoriteService.save(testUser.getId(), testRoom.getId());
+        // DB에 반영하여 unique 제약조건이 작동하도록 함
+        entityManager.flush();
+
+        // when & then - 같은 유저가 같은 룸 즐겨찾기 중복 추가 시 예외 발생
+        assertThatThrownBy(() -> {
+            favoriteService.save(testUser.getId(), testRoom.getId());
+            entityManager.flush();
+        }).isInstanceOf(Exception.class);
+    }
+
+    @Test
+    void save_shouldThrowWhenUserNotFound() {
+        // 존재하지 않는 유저로 즐겨찾기 추가 시 예외 발생
+        UUID fakeUserId = UUID.randomUUID();
+        assertThatThrownBy(() -> favoriteService.save(fakeUserId, testRoom.getId()))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void save_shouldThrowWhenRoomNotFound() {
+        // 존재하지 않는 룸으로 즐겨찾기 추가 시 예외 발생
+        assertThatThrownBy(() -> favoriteService.save(testUser.getId(), 9999L))
             .isInstanceOf(NoSuchElementException.class);
     }
 }

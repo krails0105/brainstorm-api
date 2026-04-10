@@ -1,6 +1,7 @@
 package com.brainstorm.brainstorm_api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.brainstorm.brainstorm_api.dto.ChatMessageResponse;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
@@ -8,6 +9,8 @@ import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,5 +110,20 @@ class ChatServiceTest {
         List<ChatMessageResponse> messages = chatService.getChatMessagesByRoomId(room.getId());
 
         assertThat(messages).isEmpty();
+    }
+
+    @Test
+    void 존재하지_않는_룸에_메시지_저장_시_실패() {
+        // 존재하지 않는 roomId로 메시지 저장 시도
+        assertThatThrownBy(() -> chatService.save(9999L, owner.getId(), "메시지"))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void 존재하지_않는_유저가_메시지_저장_시_실패() {
+        // 존재하지 않는 userId로 메시지 저장 시도
+        UUID fakeUserId = UUID.randomUUID();
+        assertThatThrownBy(() -> chatService.save(room.getId(), fakeUserId, "메시지"))
+            .isInstanceOf(NoSuchElementException.class);
     }
 }

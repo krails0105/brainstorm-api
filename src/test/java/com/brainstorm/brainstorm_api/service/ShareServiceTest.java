@@ -3,6 +3,7 @@ package com.brainstorm.brainstorm_api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.brainstorm.brainstorm_api.common.exception.RoomFullException;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
@@ -78,5 +79,15 @@ class ShareServiceTest {
     void 존재하지_않는_토큰으로_입장_실패() {
         assertThatThrownBy(() -> shareService.joinRoomByShareToken("invalid-token", guest.getId()))
             .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void 인원이_가득_찬_룸에_입장_시_실패() {
+        // given - totalUserCount를 1로 설정 (owner가 이미 1명)
+        room.setTotalUserCount(1);
+
+        // when & then - 가득 찬 룸에 입장 시도 → RoomFullException 발생
+        assertThatThrownBy(() -> shareService.joinRoomByShareToken(room.getShareToken(), guest.getId()))
+            .isInstanceOf(RoomFullException.class);
     }
 }

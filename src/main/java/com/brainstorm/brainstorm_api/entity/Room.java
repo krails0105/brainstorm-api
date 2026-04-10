@@ -46,6 +46,11 @@ public class Room {
     @JsonIgnore
     private List<ChatMessage> chatMessages;
 
+    // Room 삭제 시 연관된 키워드도 함께 삭제
+    @OneToMany(mappedBy = "room", cascade = CascadeType.REMOVE)
+    @JsonIgnore
+    private List<Keyword> keywords;
+
     private String name;
 
     private String topic;

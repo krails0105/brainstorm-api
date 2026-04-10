@@ -11,7 +11,9 @@ import com.brainstorm.brainstorm_api.dto.RoomRequest;
 import com.brainstorm.brainstorm_api.entity.Keyword;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
+import com.brainstorm.brainstorm_api.repository.KeywordLikeRepository;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,13 @@ class KeywordServiceTest {
     private RoomService roomService;
 
     @Autowired
+    private KeywordLikeRepository keywordLikeRepository;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private User owner;
     private User member;
@@ -178,5 +186,26 @@ class KeywordServiceTest {
 
         assertThat(keywords.get(0).getLikeCount()).isEqualTo(1);
         assertThat(keywords.get(0).isLiked()).isFalse();
+    }
+
+    @Test
+    void 키워드_삭제_시_좋아요도_함께_삭제() {
+        // given - 키워드에 좋아요가 달린 상태
+        Keyword saved = keywordService.save(room.getId(), member.getId(), createKeywordRequest("삭제대상"));
+        keywordService.toggleLike(saved.getId(), owner.getId());
+        keywordService.toggleLike(saved.getId(), member.getId());
+        // DB에 반영 후 영속성 컨텍스트 초기화 (캐시 제거)
+        entityManager.flush();
+        entityManager.clear();
+
+        // when - 키워드 삭제
+        keywordService.delete(saved.getId(), member.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        // then - 좋아요도 함께 삭제되어야 함
+        assertThat(keywordLikeRepository.findByKeywordIdAndUserId(saved.getId(), owner.getId())).isEmpty();
+        assertThat(keywordLikeRepository.findByKeywordIdAndUserId(saved.getId(), member.getId())).isEmpty();
+        assertThat(keywordLikeRepository.countByKeywordId(saved.getId())).isEqualTo(0);
     }
 }

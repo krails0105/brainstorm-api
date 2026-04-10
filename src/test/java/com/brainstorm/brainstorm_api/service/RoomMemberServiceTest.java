@@ -11,6 +11,8 @@ import com.brainstorm.brainstorm_api.entity.RoomMember;
 import com.brainstorm.brainstorm_api.entity.User;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +113,20 @@ class RoomMemberServiceTest {
 
         // then - 멤버 수 감소 확인
         assertThat(roomMemberService.getRoomMembersCount(room.getId())).isEqualTo(1);
+    }
+
+    @Test
+    void save_shouldThrowWhenRoomNotFound() {
+        // 존재하지 않는 roomId로 멤버 추가 시 예외 발생
+        assertThatThrownBy(() -> roomMemberService.save(9999L, member.getId(), RoomRole.MEMBER))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void save_shouldThrowWhenUserNotFound() {
+        // 존재하지 않는 userId로 멤버 추가 시 예외 발생
+        UUID fakeUserId = UUID.randomUUID();
+        assertThatThrownBy(() -> roomMemberService.save(room.getId(), fakeUserId, RoomRole.MEMBER))
+            .isInstanceOf(NoSuchElementException.class);
     }
 }

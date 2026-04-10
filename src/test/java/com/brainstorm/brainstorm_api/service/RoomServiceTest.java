@@ -4,11 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.brainstorm.brainstorm_api.common.exception.UnauthorizedAccessException;
+import com.brainstorm.brainstorm_api.dto.KeywordRequest;
 import com.brainstorm.brainstorm_api.dto.RoomRequest;
+import com.brainstorm.brainstorm_api.entity.Keyword;
 import com.brainstorm.brainstorm_api.entity.Room;
 import com.brainstorm.brainstorm_api.entity.User;
+import com.brainstorm.brainstorm_api.repository.KeywordLikeRepository;
+import com.brainstorm.brainstorm_api.repository.KeywordRepository;
 import com.brainstorm.brainstorm_api.repository.RoomRepository;
 import com.brainstorm.brainstorm_api.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,10 +31,22 @@ class RoomServiceTest {
     private RoomService roomService;
 
     @Autowired
+    private KeywordService keywordService;
+
+    @Autowired
     private RoomRepository roomRepository;
 
     @Autowired
+    private KeywordRepository keywordRepository;
+
+    @Autowired
+    private KeywordLikeRepository keywordLikeRepository;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private User testUser;
     private User otherUser;
@@ -145,5 +162,50 @@ class RoomServiceTest {
         // when & then - otherUser가 삭제 시도 → 권한 없음
         assertThatThrownBy(() -> roomService.delete(saved.getId(), otherUser.getId()))
             .isInstanceOf(UnauthorizedAccessException.class);
+    }
+
+    @Test
+    void delete_shouldCascadeDeleteKeywords() {
+        // given - Room에 키워드가 있는 상태
+        Room saved = roomService.save(createRoomRequest("Cascade Room", "Topic"), testUser.getId());
+        KeywordRequest keywordRequest = new KeywordRequest();
+        keywordRequest.setContent("테스트 키워드");
+        Keyword keyword = keywordService.save(saved.getId(), testUser.getId(), keywordRequest);
+        // DB에 반영 후 영속성 컨텍스트 초기화 (캐시 제거)
+        entityManager.flush();
+        entityManager.clear();
+
+        // when - Room 삭제
+        roomService.delete(saved.getId(), testUser.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        // then - 키워드도 함께 삭제되어야 함
+        assertThat(roomRepository.findById(saved.getId())).isEmpty();
+        assertThat(keywordRepository.findById(keyword.getId())).isEmpty();
+    }
+
+    @Test
+    void delete_shouldCascadeDeleteKeywordsAndLikes() {
+        // given - Room에 키워드 + 좋아요가 있는 상태
+        Room saved = roomService.save(createRoomRequest("Cascade Room", "Topic"), testUser.getId());
+        KeywordRequest keywordRequest = new KeywordRequest();
+        keywordRequest.setContent("좋아요 키워드");
+        Keyword keyword = keywordService.save(saved.getId(), testUser.getId(), keywordRequest);
+        // 좋아요 추가
+        keywordService.toggleLike(keyword.getId(), otherUser.getId());
+        // DB에 반영 후 영속성 컨텍스트 초기화 (캐시 제거)
+        entityManager.flush();
+        entityManager.clear();
+
+        // when - Room 삭제
+        roomService.delete(saved.getId(), testUser.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        // then - 키워드와 좋아요 모두 함께 삭제되어야 함
+        assertThat(roomRepository.findById(saved.getId())).isEmpty();
+        assertThat(keywordRepository.findById(keyword.getId())).isEmpty();
+        assertThat(keywordLikeRepository.findByKeywordIdAndUserId(keyword.getId(), otherUser.getId())).isEmpty();
     }
 }
